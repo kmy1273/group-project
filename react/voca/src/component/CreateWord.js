@@ -2,12 +2,12 @@ import { useRef } from "react";
 import useFetch from "../hooks/useFetch";
 
 export default function CreateWord() {
-    const days = useFetch("http://localhost:3001/days");
+    const days = useFetch("http://localhost:3000/days");
 
     function onSubmit(e) {
         e.preventDefault();
 
-        fetch(`http://localhost:3001/words/`, {
+        fetch(`http://localhost:3000/words/`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

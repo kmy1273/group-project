@@ -5,13 +5,17 @@ const conn = require('./db/database.js');
 conn.connect();
 
 const app = express();
-const PORT = process.env.port || 3001;
+const PORT = process.env.port || 3002;
+
+app.use(express.json());
+var cors = require('cors');
+app.use(cors());
 
 app.get("/", (req, res) => {
   const selectQuery = "SELECT * FROM TBBS0013D WHERE 1 = 1";
   conn.query(selectQuery, (err,result) => {
-    // res.send("success!");
-    res.send(result);
+    res.send("success!");
+    // res.send(result);
   });
 });
 
