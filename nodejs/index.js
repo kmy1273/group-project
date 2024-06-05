@@ -1,46 +1,20 @@
-const express = require('express')
-var cors = require('cors')
-const app = express()
-const port = 3000
+const express = require('express');
 
-app.use(cors()) // 비워두면 모든요청
+// DB 연결
+const conn = require('./db/database.js');
+conn.connect();
 
-app.get('/', function (req, res) {
-  res.send('Hello World')
-})
+const app = express();
+const PORT = process.env.port || 3001;
 
-// app.get('/user/:id', function (req, res) {
+app.get("/", (req, res) => {
+  const selectQuery = "SELECT * FROM TBBS0013D WHERE 1 = 1";
+  conn.query(selectQuery, (err,result) => {
+    // res.send("success!");
+    res.send(result);
+  });
+});
 
-//   // GET 방식은 params, query로 받음
-//   // POST 방식은 params, body로 받음
-
-//   // const q = req.params; // : 뒤
-//   // console.log(q.id)
-//   // const q = req.query; // ?로 시작하고 &로 이어붙임
-//   // console.log(q.id)
-//   const b = req.body;
-//   console.log(q.id)
-
-//   res.json({'userId':q.id})
-// })
-
-app.get('/sound/:name', function (req, res) {
-
-  const { name } = req.params
-  console.log(name)
-  // const q = req.query; // ?로 시작하고 &로 이어붙임
-  // console.log(q.id)
-  if (name == "dog"){
-    res.json({'sound':'멍멍'})
-  } else if (name == "cat") {
-    res.json({'sound':'야옹'})
-  } else if (name == "pig") {
-    res.json({'sound':'꿀꿀'})
-  } else {
-    res.json({'sound':'알 수 없음'})
-  }
-})
-
-app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`)
-})
+app.listen(PORT, () => {
+  console.log(`Running on port ${PORT}`)
+});
