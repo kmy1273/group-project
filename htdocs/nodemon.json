@@ -1,0 +1,6 @@
+{
+  "watch": ["server.js", "a_sys_mng/JS/*.js"],
+  "ext": "js",
+  "ignore": ["a_sys_mng/JS/*.bundle.js"],
+  "exec": "node server.js"
+}
