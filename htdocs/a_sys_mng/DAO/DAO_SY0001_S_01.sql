@@ -1,1 +1,0 @@
-SELECT * FROM tbbs5009m;
