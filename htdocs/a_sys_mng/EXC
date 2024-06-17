@@ -1,0 +1,101 @@
+const ExcelJS = require('exceljs');
+const express = require('express');
+const mariadb = require('mariadb');
+const app = express();
+const path = require('path');
+
+app.listen(3002, function(){
+    console.log("Server is running on port 3002");
+});
+
+const mysql = require('mysql');
+const connection = mysql.createConnection({
+    host: '133.186.250.200',
+    user: 'root',
+    password: 'apm6311',
+    database: 'BOMSMES'
+});
+
+// 클라이언트에게 HTML 파일 제공
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+// Excel 다운로드 엔드포인트
+app.get('/download', async (req, res) => {
+    try {
+        // MariaDB에서 데이터 가져오기
+        connection.query('SELECT * FROM TBCM024D', async function (error, results, fields) {
+            if (error) throw error;
+
+            // 엑셀 워크북 생성
+            const workbook = new ExcelJS.Workbook();
+            const worksheet = workbook.addWorksheet('sheet1');
+          
+            // 헤더 추가 : 테이블과 헤더가 같아야 읽어옴
+            worksheet.columns = [
+                { header: '글로벌구분',  key: '글로벌구분',     width: 10 },
+                { header: '사업장구분',  key: '사업장구분',     width: 20 },
+                { header: '제품코드',    key: '제품코드',       width: 10 },
+                { header: '공정차수',    key: '공정차수',       width: 10 },
+                { header: '항목순번',    key: '항목순번',       width: 10 },
+                { header: '공정코드',    key: '공정코드',       width: 10 },
+                { header: '항목구분',    key: '항목구분',       width: 10 },
+                { header: '항목명',      key: '항목명',         width: 10 },
+                { header: '공정TEXT',    key: '공정TEXT',       width: 10 },
+                { header: '치수값',      key: '치수값',         width: 10 },
+                { header: '치수단위',    key: '치수단위',       width: 10 },
+                { header: '오차상한값',  key: '오차상한값',     width: 10 },
+                { header: '오차하한값',  key: '오차하한값',     width: 10 },
+                { header: '오차단위',    key: '오차단위',       width: 10 },
+                { header: '부품코드',    key: '부품코드',       width: 10 },
+                { header: '자재규격',    key: '자재규격',       width: 10 },
+                { header: '자재명',      key: '자재명',         width: 10 },
+                { header: '자재특성',    key: '자재특성',       width: 10 },
+                { header: '공정입력구분',key: '공정입력구분',   width: 10 },
+                { header: '비고',        key: '비고',           width: 10 },
+                { header: '등록자ID',    key: '등록자ID',       width: 10 },
+                { header: '등록일자',    key: '등록일자',       width: 10 },
+                { header: '등록시간',    key: '등록시간',       width: 10 }
+            ];
+          
+            // 데이터 추가 :  worksheet.addRow([row.컬럼명1, row.컬럼명2, row.컬럼명3]);
+            results.forEach((row) => {
+                worksheet.addRow([row.global_kind, 
+                                  row.workplace_kind, 
+                                  row.prd_cd, 
+                                  row.pro_dgr, 
+                                  row.item_seq, 
+                                  row.pro_cd, 
+                                  row.item_kind, 
+                                  row.item_nm, 
+                                  row.item_text, 
+                                  row.size_val, 
+                                  row.size_unit, 
+                                  row.err_up_val, 
+                                  row.err_low_val, 
+                                  row.err_unit, 
+                                  row.compnt_cd, 
+                                  row.mat_rule, 
+                                  row.mat_nm, 
+                                  row.mat_crt, 
+                                  row.pro_ingb, 
+                                  row.desc_bigo, 
+                                  row.reg_emp_id, 
+                                  row.reg_date, 
+                                  row.reg_time]);
+            });
+          
+            // 엑셀 파일 생성
+            const buffer = await workbook.xlsx.writeBuffer();
+          
+            // 클라이언트로 엑셀 파일 보내기
+            res.set('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            res.set('Content-Disposition', 'attachment; filename=example.xlsx');
+            res.send(buffer);
+        });
+    } catch (err) {
+        console.error('Error:', err);
+        res.status(500).send('Internal Server Error');
+    }
+});
